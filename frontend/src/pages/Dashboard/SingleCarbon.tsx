@@ -176,38 +176,35 @@ const SingleCarbon = () => {
     }
   }, [settling2, success2]);
 
-  const handleApprove = (e: any) => {
+  const handleApprove = async (e: any) => {
     e.preventDefault();
-    // const value = allowanceAmountRef.current?.value;
-    // setAllowanceAmount(value);
     setLoadingA(true);
-    writeContract2({
-      address: USD_TOKEN_ADDRESS,
-      abi: USDTokenABI,
-      functionName: "approve",
-      args: [RC_MARKETPLACE_ADDRESS , parseEther(`${total}`)],
-      // onError(data: any) {
-      //     console.log(data);
-      //     toast.error("Approval failed");
-      //     setLoadingA(false);
-      // },
-    });
+    try {
+      await writeContract2({
+        address: USD_TOKEN_ADDRESS,
+        abi: USDTokenABI,
+        functionName: "approve",
+        args: [RC_MARKETPLACE_ADDRESS, parseEther(`${total}`)],
+      });
+    } catch (error) {
+      toast.error("Approval failed");
+      setLoadingA(false);
+    }
   };
+
   const handlePay = async () => {
     setLoading(true);
-    console.log(true);
-    // write2?.();
-    writeContract({
-      address: RC_MARKETPLACE_ADDRESS ,
-      abi: RCMARKETPLACEABI,
-      functionName: "buyListing",
-      args: [listing?.itemId],
-      // onError(data: any) {
-      //     console.log(data);
-      //     // toast.error("!Failed to purchase item");
-      //     setLoading(false);
-      // },
-    });
+    try {
+      await writeContract({
+        address: RC_MARKETPLACE_ADDRESS,
+        abi: RCMARKETPLACEABI,
+        functionName: "buyListing",
+        args: [listing?.itemId],
+      });
+    } catch (error) {
+      toast.error("Failed to purchase item");
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -216,16 +213,14 @@ const SingleCarbon = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //     if (isErrorA) {
-  //         setLoadingA(false);
-  //     }
-  // }, [isErrorA]);
-  // useEffect(() => {
-  //     if (isErrorP) {
-  //         setLoading(false);
-  //     }
-  // }, [isErrorP]);
+  useEffect(() => {
+    if (isError1 || isError2) {
+      toast.error("Transaction failed");
+      setLoading(false);
+      setLoadingA(false);
+    }
+  }, [isError1, isError2]);
+
   useEffect(() => {
     window.localStorage.setItem("itemAmount", `${amount}`);
   }, [amount]);

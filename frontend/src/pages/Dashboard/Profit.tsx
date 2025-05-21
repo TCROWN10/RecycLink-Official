@@ -3,7 +3,7 @@ import { useReadContract, useWriteContract } from 'wagmi';
 import { RECYCLINK_ADDRESS, RECYCLINKABI } from '../../constants';
 import { FaWallet, FaMoneyBillWave, FaChartLine, FaCheckCircle } from 'react-icons/fa';
 import { useWasteWiseContext } from '../../context';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const Profit = () => {
   const [totalProfit, setTotalProfit] = useState(0);
@@ -28,11 +28,21 @@ const Profit = () => {
   });
 
   // Withdraw profit function
-  const { writeContract: withdrawProfit } = useWriteContract({
-    address: RECYCLINK_ADDRESS,
-    abi: RECYCLINKABI,
-    functionName: "withdrawProfit",
-  });
+  const { writeContract } = useWriteContract();
+
+  const handleWithdraw = async () => {
+    try {
+      await writeContract({
+        address: RECYCLINK_ADDRESS,
+        abi: RECYCLINKABI,
+        functionName: "withdrawProfit",
+      });
+      toast.success('Withdrawal successful!');
+      setIsLoading(true);
+    } catch (error) {
+      toast.error('Withdrawal failed. Please try again.');
+    }
+  };
 
   useEffect(() => {
     if (isProfitSuccess && userProfit) {
@@ -46,22 +56,10 @@ const Profit = () => {
 
   useEffect(() => {
     if (isVerificationSuccess && verificationStatus) {
-      // Calculate progress towards verifier status (example: based on recycling amount)
-      const progress = Number(verificationStatus) / 100; // Assuming 100 is the target
+      const progress = Number(verificationStatus) / 100;
       setVerifierProgress(Math.min(progress * 100, 100));
     }
   }, [isVerificationSuccess, verificationStatus]);
-
-  const handleWithdraw = async () => {
-    try {
-      await withdrawProfit();
-      toast.success('Withdrawal successful!');
-      // Refresh profit data after withdrawal
-      setIsLoading(true);
-    } catch (error) {
-      toast.error('Withdrawal failed. Please try again.');
-    }
-  };
 
   if (isLoading) {
     return (

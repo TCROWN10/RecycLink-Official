@@ -42,7 +42,7 @@ const TeamSettings = () => {
   });
 
   // Create team function
-  const { writeContract: createTeam } = useWriteContract({
+  const { writeContract } = useWriteContract({
     address: RECYCLINK_ADDRESS,
     abi: RECYCLINKABI,
     functionName: "createTeam",
@@ -77,7 +77,10 @@ const TeamSettings = () => {
     }
 
     try {
-      await createTeam({
+      await writeContract({
+        address: RECYCLINK_ADDRESS,
+        abi: RECYCLINKABI,
+        functionName: "createTeam",
         args: [newTeamName, newTeamDescription],
       });
       toast.success('Team created successfully!');

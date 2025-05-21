@@ -25,6 +25,7 @@ export default defineConfig({
           'ui-styles': ['tailwindcss'],
           'eth-core': ['ethers'],
           'eth-utils': ['@metamask/sdk'],
+          'notifications': ['react-hot-toast', 'sonner']
         },
         // Optimize chunk size
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -55,6 +56,7 @@ export default defineConfig({
       '@metamask/sdk', 
       'ethers',
       'sonner',
+      'react-hot-toast'
     ],
     exclude: ['@safe-globalThis/safe-apps-sdk'],
   },

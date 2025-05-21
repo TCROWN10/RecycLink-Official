@@ -41,25 +41,26 @@ const CreateCarbon = (props: Props) => {
       toast.error("Kindly fill all the fields");
       return;
     }
-    writeContract({
-      address: RC_MARKETPLACE_ADDRESS ,
-      abi: RCMARKETPLACEABI,
-      functionName: "createListing",
-      args: [description, price],
-      // onError() {
-      //   toast.error("!Failed to create an event.");
-      //   setLoading(false);
-      // },
-    });
+    try {
+      await writeContract({
+        address: RC_MARKETPLACE_ADDRESS,
+        abi: RCMARKETPLACEABI,
+        functionName: "createListing",
+        args: [description, price],
+      });
+    } catch (error) {
+      toast.error("Failed to create carbon credit");
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (isError) {
-      toast.error("!Failed to create an event.");
+      toast.error("Failed to create carbon credit");
       setLoading(false);
-      console.log(error);
+      console.error(error);
     }
-  }, [isError]);
+  }, [isError, error]);
 
   const { isSuccess, isLoading } = useWaitForTransactionReceipt({
     hash: createEventData,
