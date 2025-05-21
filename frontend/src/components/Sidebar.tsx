@@ -15,11 +15,31 @@ import {
   FaPeopleGroup,
   FaLayerGroup,
   FaUser,
+  FaChartLine,
 } from "react-icons/fa6";
 import { LucideCandlestickChart } from "lucide-react";
+import { IconType } from "react-icons";
 
-// Memoized MenuItem component
-const MenuItem = React.memo(({ to, icon: Icon, label, isActive, isVisible = true }: any) => {
+interface Company {
+  name: string;
+  email: string;
+  phoneNo: string;
+  country: string;
+  gender: number;
+  profileImage: string;
+  role?: number;
+}
+
+interface MenuItemProps {
+  to: string;
+  icon: IconType | React.ComponentType;
+  label: string;
+  isActive: boolean;
+  isVisible?: boolean;
+}
+
+// Memoized MenuItem component with proper typing
+const MenuItem = React.memo(({ to, icon: Icon, label, isActive, isVisible = true }: MenuItemProps) => {
   if (!isVisible) return null;
   
   return (
@@ -39,20 +59,29 @@ const MenuItem = React.memo(({ to, icon: Icon, label, isActive, isVisible = true
   );
 });
 
+MenuItem.displayName = 'MenuItem';
+
+interface MenuItem {
+  to: string;
+  icon: IconType | React.ComponentType;
+  label: string;
+  isVisible: boolean;
+}
+
 const Sidebar = () => {
   const location = useLocation();
   const { address } = useAccount();
   const { darkMode, currentUser } = useWasteWiseContext();
   const { userRole } = useAuth();
-  const [company, setCompany] = useState<any>();
+  const [company, setCompany] = useState<Company | null>(null);
 
-  // Optimize contract read with caching
+  // Fetch company data with proper typing
   const { data, isSuccess } = useReadContract({
     address: RECYCLINK_ADDRESS,
     abi: RECYCLINKABI,
     functionName: "getCompany",
+    args: [address],
     account: address,
-    cacheTime: 30000, // Cache for 30 seconds
   });
 
   // Memoize active path
@@ -70,13 +99,13 @@ const Sidebar = () => {
   // Update company data only when needed
   useEffect(() => {
     if (isSuccess && data) {
-      setCompany(data);
+      setCompany(data as Company);
     }
   }, [isSuccess, data]);
 
   // Memoize menu items based on role
-  const menuItems = useMemo(() => {
-    const items = [
+  const menuItems = useMemo<MenuItem[]>(() => {
+    const items: MenuItem[] = [
       // Profile Menu Item - Visible to all users
       {
         to: "/dashboard/profile",
@@ -91,7 +120,7 @@ const Sidebar = () => {
       items.push(
         {
           to: "/dashboard",
-          icon: LucideCandlestickChart,
+          icon: FaChartLine,
           label: "Dashboard",
           isVisible: true
         },
@@ -225,4 +254,4 @@ const Sidebar = () => {
   );
 };
 
-export default React.memo(Sidebar);
+export default React.memo(Sidebar); 

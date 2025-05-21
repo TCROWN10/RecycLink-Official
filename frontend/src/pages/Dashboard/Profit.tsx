@@ -3,7 +3,7 @@ import { useReadContract, useWriteContract } from 'wagmi';
 import { RECYCLINK_ADDRESS, RECYCLINKABI } from '../../constants';
 import { FaWallet, FaMoneyBillWave, FaChartLine, FaCheckCircle } from 'react-icons/fa';
 import { useWasteWiseContext } from '../../context';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const Profit = () => {
   const [totalProfit, setTotalProfit] = useState(0);
