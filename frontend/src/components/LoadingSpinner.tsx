@@ -7,14 +7,22 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className = '' }) => {
   const sizeClasses = {
-    sm: 'h-8 w-8',
+    sm: 'h-6 w-6',
     md: 'h-12 w-12',
     lg: 'h-32 w-32'
   };
 
   return (
     <div className="flex items-center justify-center">
-      <div className={`animate-spin rounded-full border-t-2 border-b-2 border-primary ${sizeClasses[size]} ${className}`}></div>
+      <div 
+        className={`animate-spin rounded-full border-4 border-gray-200 ${sizeClasses[size]} ${className}`}
+        style={{
+          borderTopColor: '#983279',
+          borderRightColor: '#983279',
+          borderBottomColor: 'transparent',
+          borderLeftColor: 'transparent'
+        }}
+      />
     </div>
   );
 };
