@@ -4,6 +4,7 @@ import { RECYCLINK_ADDRESS, RECYCLINKABI } from '../../constants';
 import { FaWallet, FaMoneyBillWave, FaChartLine, FaCheckCircle } from 'react-icons/fa';
 import { useWasteWiseContext } from '../../context';
 import { toast } from 'sonner';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Profit = () => {
   const [totalProfit, setTotalProfit] = useState(0);
@@ -64,7 +65,7 @@ const Profit = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

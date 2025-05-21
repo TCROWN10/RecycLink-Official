@@ -7,6 +7,7 @@ import { formatDate } from "../../utils";
 import { RC_MARKETPLACE_ADDRESS , RCMARKETPLACEABI } from "../../constants";
 import { Card, CardBody, CardHeader, Skeleton } from "@nextui-org/react";
 import { GiToken } from "react-icons/gi";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 type Props = {};
 
@@ -43,10 +44,11 @@ const RecyclinkMarketplace = (props: Props) => {
         </p>
       )}
       <div className="flex flex-col gap-y-8 px-12">
-        {
-          // isLoading ? (
-          //   <span className="loading loading-spinner loading-lg"></span>
-          // ) : (
+        {isLoading ? (
+          <div className="flex justify-center">
+            <LoadingSpinner size="lg" />
+          </div>
+        ) : (
           listings.map((item, index) => {
             return (
               <>
@@ -107,7 +109,7 @@ const RecyclinkMarketplace = (props: Props) => {
               </>
             );
           })
-        }
+        )}
       </div>
     </div>
   );
