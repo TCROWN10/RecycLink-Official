@@ -17,10 +17,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-        <WastewiseProvider>
+          <WastewiseProvider>
             <App />
           </WastewiseProvider>
-          </BrowserRouter>
+        </BrowserRouter>
       </QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>

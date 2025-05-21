@@ -38,16 +38,15 @@ const RecyclinkMarketplace = (props: Props) => {
   }, [isError, isSuccess]);
   return (
     <div className="my-8 w-full">
-      {!isLoading && listings.length == 0 && (
-        <p className="text-lg font-semibold text-center">
-          No Items Available To Purchase
-        </p>
-      )}
       <div className="flex flex-col gap-y-8 px-12">
         {isLoading ? (
-          <div className="flex justify-center">
+          <div className="flex justify-center min-h-[40vh] items-center">
             <LoadingSpinner size="lg" />
           </div>
+        ) : listings.length === 0 ? (
+          <p className="text-lg font-semibold text-center">
+            No Items Available To Purchase
+          </p>
         ) : (
           listings.map((item, index) => {
             return (

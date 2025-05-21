@@ -73,9 +73,9 @@ const MyCarbonEvents = (props: Props) => {
     return (
         <div className="my-8 w-10/12">
             <div className="font-bold text-2xl">Transactions</div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[40vh]">
                 {loading ? (
-                    <div className="w-20 mx-auto">
+                    <div className="flex justify-center items-center h-full">
                         <LoadingSpinner size="md" />
                     </div>
                 ) : (

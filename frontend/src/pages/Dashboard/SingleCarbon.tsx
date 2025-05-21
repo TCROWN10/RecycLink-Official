@@ -229,6 +229,14 @@ const SingleCarbon = () => {
   useEffect(() => { }, [allowanceListener]);
   console.log(allowance);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="mb-8 w-full p-12">
       <div className="flex justify-between items-start gap-x-8">
