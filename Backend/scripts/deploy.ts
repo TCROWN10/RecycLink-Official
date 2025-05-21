@@ -1,55 +1,197 @@
-const hre = require("hardhat");
+import { ethers } from "hardhat";
+import { run } from "hardhat";
+import * as fs from "fs";
+
+// Helper function to wait for confirmations with retry
+async function waitForConfirmations(tx: any, confirmations: number = 5, maxRetries: number = 3) {
+  console.log(`Waiting for ${confirmations} confirmations...`);
+  let retries = 0;
+  while (retries < maxRetries) {
+    try {
+      await tx.wait(confirmations);
+      console.log(`Transaction confirmed ${confirmations} times`);
+      return;
+    } catch (error: unknown) {
+      retries++;
+      if (retries === maxRetries) {
+        throw error;
+      }
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.log(`Retry ${retries}/${maxRetries} after error:`, errorMessage);
+      await delay(10000); // Wait 10 seconds before retry
+    }
+  }
+}
+
+// Helper function to delay execution
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Helper function to verify contract with retry
+async function verifyContract(address: string, contract: string, constructorArguments: any[], maxRetries: number = 3) {
+  let retries = 0;
+  while (retries < maxRetries) {
+    try {
+      await run("verify:verify", {
+        address,
+        contract,
+        constructorArguments,
+      });
+      console.log(`${contract} verified successfully!`);
+      return;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes("already been verified")) {
+        console.log(`${contract} already verified!`);
+        return;
+      }
+      retries++;
+      if (retries === maxRetries) {
+        console.log(`${contract} verification failed after ${maxRetries} attempts:`, errorMessage);
+        return;
+      }
+      console.log(`Retry ${retries}/${maxRetries} for ${contract} verification...`);
+      await delay(30000); // Wait 30 seconds before retry
+    }
+  }
+}
 
 async function main() {
-  const [deployer] = await hre.ethers.getSigners();
-
+  const [deployer] = await ethers.getSigners();
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Use fully qualified name for USDToken
-  const USDToken = await hre.ethers.getContractFactory("contracts/USDT.sol:USDToken");
-  const CreditToken = await hre.ethers.getContractFactory("contracts/Credit.sol:CreditToken");
-  const CarbonWise = await hre.ethers.getContractFactory("contracts/RecycLink.sol:CarbonWise");
-  const EventMarketPlace = await hre.ethers.getContractFactory("EventMarketPlace");
-  const CcMarketPlace = await hre.ethers.getContractFactory("CcMarketPlace");
-
-  // Deploy USDToken first
+  console.log("\n1. Deploying USDToken...");
+  const USDToken = await ethers.getContractFactory("contracts/USDT.sol:USDToken");
   const usdToken = await USDToken.deploy();
-  await usdToken.waitForDeployment();
+  const usdTokenTx = await usdToken.waitForDeployment();
+  const usdTokenAddress = await usdToken.getAddress();
+  console.log("USDToken deployed to:", usdTokenAddress);
+  await waitForConfirmations(usdTokenTx.deploymentTransaction());
+  await delay(30000);
 
-  // Deploy USDToken first
-  const creditToken = await CreditToken.deploy();
-  await creditToken.waitForDeployment();
+  // Verify USDToken
+  console.log("Verifying USDToken...");
+  await verifyContract(
+    usdTokenAddress,
+    "contracts/USDT.sol:USDToken",
+    []
+  );
 
-  // Deploy CarbonWise with the USDToken address
-  const carbonWise = await CarbonWise.deploy(usdToken.target);
-  await carbonWise.waitForDeployment();
+  console.log("\n2. Deploying CreditToken...");
+  const CreditToken = await ethers.getContractFactory("contracts/Credit.sol:USDToken");
+  const creditToken = await CreditToken.deploy("Credit Token", "CREDIT");
+  const creditTokenTx = await creditToken.waitForDeployment();
+  const creditTokenAddress = await creditToken.getAddress();
+  console.log("CreditToken deployed to:", creditTokenAddress);
+  await waitForConfirmations(creditTokenTx.deploymentTransaction());
+  await delay(30000);
 
-  // Deploy EventMarketPlace with USDToken and CarbonWise addresses
+  // Verify CreditToken
+  console.log("Verifying CreditToken...");
+  await verifyContract(
+    creditTokenAddress,
+    "contracts/Credit.sol:USDToken",
+    ["Credit Token", "CREDIT"]
+  );
+
+  console.log("\n3. Deploying CarbonWise...");
+  const CarbonWise = await ethers.getContractFactory("contracts/RecycLink.sol:CarbonWise");
+  const carbonWise = await CarbonWise.deploy(usdTokenAddress);
+  const carbonWiseTx = await carbonWise.waitForDeployment();
+  const carbonWiseAddress = await carbonWise.getAddress();
+  console.log("CarbonWise deployed to:", carbonWiseAddress);
+  await waitForConfirmations(carbonWiseTx.deploymentTransaction());
+  await delay(30000);
+
+  // Verify CarbonWise
+  console.log("Verifying CarbonWise...");
+  await verifyContract(
+    carbonWiseAddress,
+    "contracts/RecycLink.sol:CarbonWise",
+    [usdTokenAddress]
+  );
+
+  console.log("\n4. Deploying EventMarketPlace...");
+  const EventMarketPlace = await ethers.getContractFactory("contracts/EventMarketPlace.sol:EventMarketPlace");
   const eventMarketPlace = await EventMarketPlace.deploy(
-    usdToken.target, 
-    carbonWise.target
+    usdTokenAddress,
+    carbonWiseAddress
   );
-  await eventMarketPlace.waitForDeployment();
+  const eventMarketPlaceTx = await eventMarketPlace.waitForDeployment();
+  const eventMarketPlaceAddress = await eventMarketPlace.getAddress();
+  console.log("EventMarketPlace deployed to:", eventMarketPlaceAddress);
+  await waitForConfirmations(eventMarketPlaceTx.deploymentTransaction());
+  await delay(30000);
 
-  // Dummy Credit contract deployment (modify as needed)
-//   const CreditToken = await hre.ethers.getContractFactory("Credit");
-//   const creditToken = await CreditToken.deploy();
-//   await creditToken.waitForDeployment();
+  // Verify EventMarketPlace
+  console.log("Verifying EventMarketPlace...");
+  await verifyContract(
+    eventMarketPlaceAddress,
+    "contracts/EventMarketPlace.sol:EventMarketPlace",
+    [usdTokenAddress, carbonWiseAddress]
+  );
 
-  // Deploy CcMarketPlace with USDToken, Credit, and CarbonWise addresses
+  console.log("\n5. Deploying CcMarketPlace...");
+  const CcMarketPlace = await ethers.getContractFactory("contracts/RcMarketPlace.sol:CcMarketPlace");
   const ccMarketPlace = await CcMarketPlace.deploy(
-    usdToken.target, 
-    creditToken.target,
-    carbonWise.target
+    usdTokenAddress,
+    creditTokenAddress,
+    carbonWiseAddress
   );
-  await ccMarketPlace.waitForDeployment();
+  const ccMarketPlaceTx = await ccMarketPlace.waitForDeployment();
+  const ccMarketPlaceAddress = await ccMarketPlace.getAddress();
+  console.log("CcMarketPlace deployed to:", ccMarketPlaceAddress);
+  await waitForConfirmations(ccMarketPlaceTx.deploymentTransaction());
+  await delay(30000);
 
-  // Log deployed contract addresses
-  console.log("USDToken deployed to:", usdToken.target);
-  console.log("CreditToken deployed to:", creditToken.target);
-  console.log("CarbonWise deployed to:", carbonWise.target);
-  console.log("EventMarketPlace deployed to:", eventMarketPlace.target);
-  console.log("CcMarketPlace deployed to:", ccMarketPlace.target);
+  // Verify CcMarketPlace
+  console.log("Verifying CcMarketPlace...");
+  await verifyContract(
+    ccMarketPlaceAddress,
+    "contracts/RcMarketPlace.sol:CcMarketPlace",
+    [usdTokenAddress, creditTokenAddress, carbonWiseAddress]
+  );
+
+  // Deploy ProfileManager
+  console.log("Deploying ProfileManager...");
+  const ProfileManager = await ethers.getContractFactory("ProfileManager");
+  const profileManager = await ProfileManager.deploy();
+  await profileManager.waitForDeployment();
+  const profileManagerAddress = await profileManager.getAddress();
+  console.log("ProfileManager deployed to:", profileManagerAddress);
+
+  // Verify ProfileManager
+  console.log("Verifying ProfileManager...");
+  try {
+    await run("verify:verify", {
+      address: profileManagerAddress,
+      constructorArguments: [],
+    });
+    console.log("ProfileManager verified successfully");
+  } catch (error) {
+    console.error("Error verifying ProfileManager:", error);
+  }
+
+  // Save addresses
+  const addresses = {
+    USDToken: usdTokenAddress,
+    CreditToken: creditTokenAddress,
+    CarbonWise: carbonWiseAddress,
+    EventMarketPlace: eventMarketPlaceAddress,
+    CcMarketPlace: ccMarketPlaceAddress,
+    ProfileManager: profileManagerAddress,
+  };
+
+  fs.writeFileSync("deploy_Address.json", JSON.stringify(addresses, null, 2));
+  console.log("Addresses saved to deploy_Address.json");
+
+  console.log("Deployment Summary:");
+  console.log("-------------------");
+  console.log("USDToken:", usdTokenAddress);
+  console.log("CreditToken:", creditTokenAddress);
+  console.log("CarbonWise:", carbonWiseAddress);
+  console.log("EventMarketPlace:", eventMarketPlaceAddress);
+  console.log("CcMarketPlace:", ccMarketPlaceAddress);
+  console.log("ProfileManager:", profileManagerAddress);
 }
 
 main()

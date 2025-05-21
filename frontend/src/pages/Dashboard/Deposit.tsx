@@ -239,11 +239,11 @@ const Recycle = () => {
             <CardFooter>
               <Button
                 type="submit"
-                color="success"
                 variant="shadow"
                 isLoading={isPending || isDepositingPlastic}
                 fullWidth
                 size="lg"
+                className="bg-[#983279] hover:bg-[#983279]/90 text-white"
               >
                 Recycle
               </Button>

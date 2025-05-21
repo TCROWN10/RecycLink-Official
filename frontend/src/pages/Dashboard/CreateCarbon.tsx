@@ -148,10 +148,9 @@ const CreateCarbon = (props: Props) => {
           <CardFooter>
             <Button
               type="submit"
-              color="success"
               size="lg"
               endContent={<LucideArrowRight size={16} />}
-              className="font-firaSans font-bold"
+              className="font-firaSans font-bold bg-[#983279] hover:bg-[#983279]/90 text-white"
               isLoading={isLoading}
               isDisabled={!(price && description)}
             >

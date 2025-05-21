@@ -1,49 +1,34 @@
-require("dotenv").config();
-require("@nomicfoundation/hardhat-ethers");
-require("@nomicfoundation/hardhat-verify");
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-verify";
+import * as dotenv from "dotenv";
 
-module.exports = {
+dotenv.config();
+
+// Ensure private key is properly formatted
+const PRIVATE_KEY = process.env.PRIVATE_KEY?.startsWith('0x') 
+  ? process.env.PRIVATE_KEY.slice(2) 
+  : process.env.PRIVATE_KEY || "0000000000000000000000000000000000000000000000000000000000000000";
+
+const ETHERSCAN_API_KEY = "T4MBMIUDVKF343XKSKYGSCQIE9P2IV4P9X";
+
+const config: HardhatUserConfig = {
   solidity: "0.8.20",
   sourcify: {
     enabled: false,
   },
   networks: {
     sepolia: {
-      url: process.env.SEPOLIA_RPC,
-      accounts: [process.env.PRIVATE_KEY],
-    },
-    opencampus: {
-      url: `https://rpc.open-campus-codex.gelato.digital/`,
-      accounts: [process.env.PRIVATE_KEY],
-    },
-    baseSepolia: {
-      url: "https://sepolia.base.org", // Official Base Sepolia RPC
-      accounts: [process.env.PRIVATE_KEY],
-      chainId: 84532,
-    },
+      url: "https://eth-sepolia.g.alchemy.com/v2/EzkLGxQzDcyT-PU8k-DbYL6iAIB1l1TE",
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
+      gasPrice: "auto",
+    }
   },
   etherscan: {
-    apiKey: {
-      opencampus: "your-etherscan-api-key",
-      base_sepolia: process.env.ETHERSCAN_API_KEY_BASE, // optional if you want to verify
-    },
-    customChains: [
-      {
-        network: "opencampus",
-        chainId: 656476,
-        urls: {
-          apiURL: "https://edu-chain-testnet.blockscout.com/api",
-          browserURL: "https://edu-chain-testnet.blockscout.com",
-        },
-      },
-      {
-        network: "base_sepolia",
-        chainId: 84532,
-        urls: {
-          apiURL: "https://api-sepolia.basescan.org/api",
-          browserURL: "https://sepolia.basescan.org",
-        },
-      },
-    ],
+    apiKey: ETHERSCAN_API_KEY
   },
 };
+
+export default config;

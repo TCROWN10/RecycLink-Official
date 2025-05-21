@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useContractWrite, useAccount } from "wagmi";
-import { BaseError } from "viem";
+import { useWriteContract, useAccount } from "wagmi";
+import { WriteContractErrorType } from "wagmi/actions";
 import Button from "../../components/Button";
 import { useWasteWiseContext } from "../../context";
 import { formatDate } from "../../utils";
-import { RECYCLINK_ADDRESS, RECYCLINKABI } from "../../constants";
+import { PROFILE_MANAGER_ADDRESS, ProfileManagerABI } from "../../constants";
 import { toast } from "sonner";
 import useNotificationCount from "../../hooks/useNotificationCount";
 import { useNavigate } from "react-router-dom";
@@ -21,16 +21,6 @@ interface UserProfileData {
   userAddr: string;
 }
 
-interface UserProfileContractData {
-  name: string;
-  email: string;
-  phoneNo: bigint;
-  country: string;
-  gender: number;
-  profileImage: string;
-  userAddr: `0x${string}`;
-}
-
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = 'detc4yjdi';
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
@@ -44,7 +34,7 @@ const Profile = () => {
   const { address } = useAccount();
   const [isUploading, setIsUploading] = useState(false);
 
-  const [formData, setFormData] = useState<UserProfileData>({
+  const [profileData, setProfileData] = useState<UserProfileData>({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
     phoneNo: currentUser?.phoneNo?.toString() || "",
@@ -56,25 +46,13 @@ const Profile = () => {
 
   const [isEmailValid, setIsEmailValid] = useState<boolean>(true);
 
-  const { write, isLoading: isUpdating } = useContractWrite({
-    address: RECYCLINK_ADDRESS as `0x${string}`,
-    abi: RECYCLINKABI,
-    functionName: "editUser",
-    args: undefined,
-    onSuccess(data: any) {
-      console.log('Transaction submitted:', data);
-      toast.success('Profile update transaction submitted!');
-    },
-    onError(error: BaseError) {
-      console.error('Contract error:', error);
-      toast.error(error.message || 'Failed to update profile');
-    }
-  });
+  // Use contract write
+  const { writeContract, isPending: isUpdating } = useWriteContract();
 
   useEffect(() => {
-    // Initialize form data when currentUser or address changes
+    // Initialize profile data when currentUser or address changes
     if (currentUser) {
-      setFormData({
+      setProfileData({
         name: currentUser.name || "",
         email: currentUser.email || "",
         phoneNo: currentUser.phoneNo?.toString() || "",
@@ -131,27 +109,26 @@ const Profile = () => {
       const data = await response.json();
       const imageUrl = data.secure_url;
 
-      // Update form data with new image URL
-      setFormData(prev => ({ ...prev, profileImage: imageUrl }));
+      // Update profile data with new image URL
+      setProfileData(prev => ({ ...prev, profileImage: imageUrl }));
 
-      // Create the profile data object with the correct types
-      const profileData: UserProfileContractData = {
-        name: formData.name,
-        email: formData.email,
-        phoneNo: BigInt(formData.phoneNo || '0'),
-        country: formData.country,
-        gender: Number(formData.gender),
-        profileImage: imageUrl,
-        userAddr: address as `0x${string}`
-      };
-
-      // Call the write function with the prepared data
-      if (!write) {
-        throw new Error('Contract write function not initialized');
+      // Call writeContract with the new image URL
+      if (!writeContract) {
+        throw new Error('Contract not ready. Please try again.');
       }
 
-      write({
-        args: [profileData],
+      await writeContract({
+        address: PROFILE_MANAGER_ADDRESS as `0x${string}`,
+        abi: ProfileManagerABI,
+        functionName: "updateProfile",
+        args: [
+          profileData.name,
+          profileData.email,
+          BigInt(profileData.phoneNo || '0'),
+          profileData.country,
+          profileData.gender,
+          imageUrl
+        ]
       });
 
       toast.success('Please confirm the transaction in your wallet', {
@@ -172,7 +149,7 @@ const Profile = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setProfileData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'email') {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -193,48 +170,51 @@ const Profile = () => {
       return;
     }
 
+    if (!writeContract) {
+      toast.error('Contract not ready. Please try again.');
+      return;
+    }
+
     try {
       const toastId = toast.loading('Preparing to update profile...');
 
-      // Create the profile data object with the correct types
-      const profileData: UserProfileContractData = {
-        name: formData.name,
-        email: formData.email,
-        phoneNo: BigInt(formData.phoneNo || '0'),
-        country: formData.country,
-        gender: Number(formData.gender),
-        profileImage: formData.profileImage,
-        userAddr: address as `0x${string}`
+      // Ensure all values are properly formatted
+      const formattedData = {
+        name: profileData.name.trim(),
+        email: profileData.email.trim(),
+        phoneNo: BigInt(profileData.phoneNo || '0'),
+        country: profileData.country.trim(),
+        gender: Number(profileData.gender),
+        profileImage: profileData.profileImage.trim()
       };
 
-      // Call the write function with the prepared data
-      if (!write) {
-        throw new Error('Contract write function not initialized');
-      }
-
-      write({
-        args: [profileData],
+      // Call writeContract with the formatted data
+      await writeContract({
+        address: PROFILE_MANAGER_ADDRESS as `0x${string}`,
+        abi: ProfileManagerABI,
+        functionName: "updateProfile",
+        args: [
+          formattedData.name,
+          formattedData.email,
+          formattedData.phoneNo,
+          formattedData.country,
+          formattedData.gender,
+          formattedData.profileImage
+        ]
       });
 
       toast.success('Please confirm the transaction in your wallet', {
         id: toastId,
         duration: 5000
       });
-      
-      // Update notification count after successful write initiation
-      wastewiseStore.setItem(Date.now().toString(), {
-        id: Date.now(),
-        title: 'Profile Update Initiated',
-        datetime: new Date(),
-        type: 'info',
-        message: 'Please confirm the transaction in your wallet'
-      }).then(() => {
-        setNotifCount(notificationCount + 1);
-      });
 
     } catch (error: any) {
       console.error('Update error:', error);
-      toast.error(error.message || 'Failed to update profile. Please try again.');
+      if (error.message.includes('user rejected')) {
+        toast.error('Transaction rejected. Please try again.');
+      } else {
+        toast.error(error.message || 'Failed to update profile. Please try again.');
+      }
     }
   };
 
@@ -246,7 +226,7 @@ const Profile = () => {
           <div className="bg-base-200 rounded-xl p-6">
             <div className="relative w-48 h-48 mx-auto">
               <img
-                src={formData.profileImage}
+                src={profileData.profileImage}
                 alt="Profile"
                 className="w-full h-full rounded-full object-cover ring-2 ring-primary"
               />
@@ -278,7 +258,7 @@ const Profile = () => {
               </div>
             
             <div className="text-center mt-4">
-              <h2 className="text-2xl font-bold">{formData.name}</h2>
+              <h2 className="text-2xl font-bold">{profileData.name}</h2>
               <p className="text-sm text-gray-500">Member since: {formatDate(Number(currentUser?.timeJoined))}</p>
             </div>
           </div>
@@ -296,7 +276,7 @@ const Profile = () => {
                   <input
                     type="text"
                     name="name"
-                    value={formData.name}
+                    value={profileData.name}
                     onChange={handleInputChange}
                     className="input input-bordered w-full"
                   />
@@ -307,7 +287,7 @@ const Profile = () => {
                   <input
                     type="email"
                     name="email"
-                    value={formData.email}
+                    value={profileData.email}
                     onChange={handleInputChange}
                     className={`input input-bordered w-full ${!isEmailValid ? 'input-error' : ''}`}
                   />
@@ -318,7 +298,7 @@ const Profile = () => {
                   <input
                     type="tel"
                     name="phoneNo"
-                    value={formData.phoneNo}
+                    value={profileData.phoneNo}
                     onChange={handleInputChange}
                     className="input input-bordered w-full"
                   />
@@ -327,8 +307,8 @@ const Profile = () => {
             <div>
                   <label className="label">Country</label>
                   <CountryDropdown
-                    value={formData.country}
-                    onChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
+                    value={profileData.country}
+                    onChange={(val) => setProfileData(prev => ({ ...prev, country: val }))}
                     classes="select select-bordered w-full"
                   />
             </div>
@@ -337,7 +317,7 @@ const Profile = () => {
                   <label className="label">Gender</label>
                   <select
                     name="gender"
-                    value={formData.gender}
+                    value={profileData.gender}
                     onChange={handleInputChange}
                     className="select select-bordered w-full"
                   >

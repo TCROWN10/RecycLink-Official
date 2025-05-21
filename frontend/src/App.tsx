@@ -11,6 +11,9 @@ import { Toaster, toast } from "sonner";
 import { useWasteWiseContext } from "./context";
 import { NextUIProvider } from "@nextui-org/react";
 import { useAuth } from "./hooks/useAuth";
+import CompanyDashboard from './pages/Dashboard/CompanyDashboard';
+import CompanyOverview from './pages/Dashboard/CompanyOverview';
+import CompanyRegister from './pages/CompanyRegister';
 
 // Lazy load components
 const Register = lazy(() => import("./pages/Register"));
@@ -29,10 +32,14 @@ const Stats = lazy(() => import("./components/dashboard/home/Stats"));
 const CreateCarbon = lazy(() => import("./pages/Dashboard/CreateCarbon"));
 const SingleCarbon = lazy(() => import("./pages/Dashboard/SingleCarbon"));
 const RecyclinkMarketplace = lazy(() => import("./pages/Dashboard/CarbonMarket"));
-const CompanyRegister = lazy(() => import("./pages/Dashboard/CompanyRegister"));
 const Disbursement = lazy(() => import("./pages/Dashboard/Disbursement"));
 const MyCarbonEvents = lazy(() => import("./pages/Dashboard/MyCarbonEvents"));
 const NFTs = lazy(() => import("./pages/Dashboard/NFTs"));
+const Leaderboard = lazy(() => import("./pages/Dashboard/Leaderboard"));
+const Profit = lazy(() => import("./pages/Dashboard/Profit"));
+const MyPurchases = lazy(() => import("./pages/Dashboard/MyPurchases"));
+const TeamSettings = lazy(() => import("./pages/Dashboard/TeamSettings"));
+const Analytics = lazy(() => import("./pages/Dashboard/Analytics"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -80,98 +87,52 @@ export function App() {
     <NextUIProvider navigate={navigate}>
       <div className={darkMode.value ? "dark" : "light"}>
         <div className="min-h-screen bg-background text-foreground">
-        <section className="relative w-full h-screen overflow-x-hidden overflow-y-auto">
-          <div className="block relative">
-            <Toaster
+          <section className="relative w-full h-screen overflow-x-hidden overflow-y-auto">
+            <div className="block relative">
+              <Toaster
                 theme={darkMode.value ? "dark" : "light"}
-              position="top-right"
-              toastOptions={{
-                style: {
-                  top: "60px",
-                },
-              }}
-              richColors={true}
-              gap={6}
-              closeButton={true}
-            />
-          </div>
-            <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Layout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<Home />} />
-              <Route path="wallet" element={<Wallet />} />
-              <Route path="settings" element={<Settings />} />
-                  <Route path="marketplace" element={<Marketplace />} />
-                  <Route path="profile" element={<Profile />} />
-              <Route path="recycle" element={<Recycle />} />
-                  <Route
-                    path="createEvent"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <CreateEvent />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="myEvents" element={<MyEvents />} />
-                  <Route path="event/:id" element={<SingleEvent />} />
-                  <Route
-                    path="createAdmin"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <CreateAdmin />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="stats"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin", "verifier"]}>
-                        <Stats />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="createCarbon"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <CreateCarbon />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="carbon/:id" element={<SingleCarbon />} />
-                  <Route path="carbonMarket" element={<RecyclinkMarketplace />} />
-                  <Route
-                    path="companyRegister"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <CompanyRegister />
-                      </ProtectedRoute>
-                    }
-                  />
-              <Route
-                    path="disbursement"
-                    element={
-                      <ProtectedRoute allowedRoles={["admin"]}>
-                        <Disbursement />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="myCarbonEvents" element={<MyCarbonEvents />} />
-                  <Route path="nfts" element={<NFTs />} />
-            </Route>
-                <Route path="*" element={<ErrorPage />} />
-          </Routes>
-            </Suspense>
-        </section>
+                position="top-right"
+                toastOptions={{
+                  style: {
+                    top: "60px",
+                  },
+                }}
+                richColors={true}
+                gap={6}
+                closeButton={true}
+              />
+            </div>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/companyregister" element={<CompanyRegister />} />
+              <Route path="/dashboard" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="wallet" element={<Wallet />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="marketplace" element={<Marketplace />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="deposit" element={<Recycle />} />
+                <Route path="create-event" element={<CreateEvent />} />
+                <Route path="my-events" element={<MyEvents />} />
+                <Route path="event/:id" element={<SingleEvent />} />
+                <Route path="create-admin" element={<CreateAdmin />} />
+                <Route path="stats" element={<Stats />} />
+                <Route path="create-carbon" element={<CreateCarbon />} />
+                <Route path="carbon/:id" element={<SingleCarbon />} />
+                <Route path="carbon-market" element={<RecyclinkMarketplace />} />
+                <Route path="disbursement" element={<Disbursement />} />
+                <Route path="my-carbon-events" element={<MyCarbonEvents />} />
+                <Route path="nfts" element={<NFTs />} />
+                <Route path="leaderboard" element={<Leaderboard />} />
+                <Route path="profit" element={<Profit />} />
+                <Route path="my-purchases" element={<MyPurchases />} />
+                <Route path="team-settings" element={<TeamSettings />} />
+                <Route path="analytics" element={<Analytics />} />
+              </Route>
+              <Route path="*" element={<ErrorPage />} />
+            </Routes>
+          </section>
         </div>
       </div>
     </NextUIProvider>

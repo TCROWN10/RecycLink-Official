@@ -102,10 +102,10 @@ const Disbursement = () => {
           <Button
             type="submit"
             size="lg"
-            color="success"
             variant="shadow"
             isLoading={isPending || isLoading}
             startContent={<LucideCoins />}
+            className="bg-[#983279] hover:bg-[#983279]/90 text-white"
           >
             Disburse to Recyclers
           </Button>

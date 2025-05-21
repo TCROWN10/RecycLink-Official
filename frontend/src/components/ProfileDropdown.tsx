@@ -13,6 +13,8 @@ import { LucidePower } from "lucide-react";
 import { shortenAddress, capitalize, roleMap } from "../utils";
 import { useAccount, useDisconnect } from "wagmi";
 import { useNavigate } from "react-router-dom";
+import { FaUsers, FaChartLine, FaCrown, FaUser, FaUserShield, FaRecycle } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function ProfileDropdown({
   isRegistered,
@@ -34,50 +36,77 @@ export default function ProfileDropdown({
     }
   };
 
+  const getRoleIcon = (role: string | undefined) => {
+    if (!role || typeof role !== 'string') return null;
+    
+    const roleLower = role.toLowerCase();
+    switch (roleLower) {
+      case 'admin':
+        return <FaUserShield className="w-4 h-4" />;
+      case 'user':
+        return <FaUser className="w-4 h-4" />;
+      case 'recycler':
+        return <FaRecycle className="w-4 h-4" />;
+      default:
+        return <FaUser className="w-4 h-4" />;
+    }
+  };
+
+  const getRoleColor = (role: string | undefined) => {
+    if (!role || typeof role !== 'string') return 'text-blue-500';
+    
+    const roleLower = role.toLowerCase();
+    switch (roleLower) {
+      case 'admin':
+        return 'text-yellow-500';
+      case 'verifier':
+        return 'text-[#983279]';
+      default:
+        return 'text-blue-500';
+    }
+  };
+
   return (
     <Dropdown placement="bottom-end" className="w-60">
       <DropdownTrigger>
-        {isRegistered ? (
           <User
             as="button"
             avatarProps={{
               isBordered: true,
               src: "https://api.dicebear.com/7.x/adventurer/svg?seed=Daisy",
-              color: isRegistered ? "success" : "default",
+            className: "bg-[#983279]"
             }}
             className="transition-transform"
-            name={currentUser?.name}
-            description={shortenAddress(currentUser?.userAddr)}
+          description={
+            <div className="flex items-center gap-1">
+              {getRoleIcon(currentUser?.role)}
+              <span className={getRoleColor(currentUser?.role)}>
+                {currentUser?.role || 'User'}
+              </span>
+            </div>
+          }
+          name={currentUser?.name || 'Anonymous'}
           />
-        ) : (
-          <Avatar
-            isBordered
-            as="button"
-            className="transition-transform"
-            src=""
-          />
-        )}
       </DropdownTrigger>
-      <DropdownMenu aria-label="Profile Actions" variant="flat">
+      <DropdownMenu 
+        aria-label="Profile Actions" 
+        variant="flat"
+        className="bg-background text-foreground"
+      >
         <DropdownSection aria-label="Profile" showDivider>
-          <DropdownItem key="address" className="h-14 gap-2">
+          <DropdownItem key="address" className="h-14 gap-2 text-foreground">
             <p className="font-semibold">Signed in as</p>
             <p className="font-semibold">{shortenAddress(address as string)}</p>
           </DropdownItem>
-          {/* Let's get started */}
-          <DropdownItem
-            key="profile"
-            endContent={
-              <Chip color="success" variant="flat">
-                {currentUser?.role !== undefined &&
-                  capitalize(
-                    roleMap[currentUser?.role as keyof typeof roleMap]
-                  )}
-              </Chip>
-            }
-            href="/dashboard/profile"
-          >
-            Profile
+          <DropdownItem key="profile" className="h-14 gap-2 text-foreground">
+            <p className="font-semibold">Signed in as</p>
+            <p className="font-semibold">{currentUser?.name || 'Anonymous'}</p>
+            <div className="flex items-center gap-1">
+              {getRoleIcon(currentUser?.role)}
+              <span className={getRoleColor(currentUser?.role)}>
+                {currentUser?.role || 'User'}
+              </span>
+            </div>
           </DropdownItem>
         </DropdownSection>
         <DropdownSection
@@ -85,23 +114,35 @@ export default function ProfileDropdown({
           showDivider
           className="block lg:hidden"
         >
-          <DropdownItem key="dashboard" href="/dashboard">
+          <DropdownItem key="dashboard" href="/dashboard" className="text-foreground">
             <Button fullWidth className="font-semibold">
               Dashboard
             </Button>
           </DropdownItem>
         </DropdownSection>
         <DropdownSection aria-label="Menu" key="menu" showDivider>
-          <DropdownItem key="marketplace" href="/dashboard/marketplace">
+          <DropdownItem key="marketplace" href="/dashboard/marketplace" className="text-foreground">
             Marketplace
           </DropdownItem>
-          <DropdownItem key="team_settings">Team Settings</DropdownItem>
-          <DropdownItem key="analytics" href="/dashboard">
+          <DropdownItem
+            key="team_settings"
+            startContent={<FaUsers className="text-[#983279]" />}
+            href="/dashboard/team-settings"
+            className="text-foreground"
+          >
+            Team Settings
+          </DropdownItem>
+          <DropdownItem
+            key="analytics"
+            startContent={<FaChartLine className="text-[#983279]" />}
+            href="/dashboard/analytics"
+            className="text-foreground"
+          >
             Analytics
           </DropdownItem>
-          <DropdownItem key="system">System</DropdownItem>
-          <DropdownItem key="configurations">Configurations</DropdownItem>
-          <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+          <DropdownItem key="system" className="text-foreground">System</DropdownItem>
+          <DropdownItem key="configurations" className="text-foreground">Configurations</DropdownItem>
+          <DropdownItem key="help_and_feedback" className="text-foreground">Help & Feedback</DropdownItem>
         </DropdownSection>
         <DropdownSection key="Logout">
           <DropdownItem
@@ -109,6 +150,7 @@ export default function ProfileDropdown({
             color="danger"
             endContent={<LucidePower size={16} strokeWidth={4} />}
             onPress={handleDisconnect}
+            className="text-danger"
           >
             Log Out
           </DropdownItem>

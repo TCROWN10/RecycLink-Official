@@ -8,7 +8,7 @@ import {
 // import Button from "./Button";
 import { ToastElem, capitalize, roleMap, shortenAddress } from "../utils";
 import { toast } from "sonner";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, memo, Suspense } from "react";
 import { BaseError } from "viem";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../assets";
@@ -39,63 +39,157 @@ import {
 import { LucideBuilding2, LucidePower, LucideUserPlus2 } from "lucide-react";
 import ProfileDropdown from "./ProfileDropdown";
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
+// Memoized ProfileDropdown component
+const MemoizedProfileDropdown = memo(ProfileDropdown);
+
+// Memoized Loading Skeleton
+const LoadingSkeleton = memo(() => (
+  <div className="max-w-40 w-full flex items-center gap-3">
+    <div>
+      <Skeleton className="flex rounded-full w-12 h-12" />
+    </div>
+    <div className="w-full flex flex-col gap-2">
+      <Skeleton className="h-3 w-3/5 rounded-lg" />
+      <Skeleton className="h-3 w-4/5 rounded-lg" />
+    </div>
+  </div>
+));
+
+// Memoized Connect Button
+const ConnectButton = memo(({ onClick, isPending }: { onClick: () => void; isPending: boolean }) => (
+  <Button
+    onClick={onClick}
+    disabled={isPending}
+    className="bg-[#983279] hover:bg-[#983279]/90 text-white w-full"
+  >
+    {isPending ? "Connecting..." : "Connect Wallet"}
+  </Button>
+));
+
+// Memoized Error Modal
+const ErrorModal = memo(({ isOpen, onClose, error }: { isOpen: boolean; onClose: () => void; error: any }) => (
+  <Modal isOpen={isOpen} onClose={onClose} size="sm">
+    <ModalContent className="text-black dark:text-white">
+      <ModalHeader className="text-black dark:text-white">Connection Error</ModalHeader>
+      <ModalBody>
+        <p className="text-red-500">{error?.message || "Failed to connect wallet"}</p>
+      </ModalBody>
+      <ModalFooter>
+        <Button onClick={onClose}>Close</Button>
+      </ModalFooter>
+    </ModalContent>
+  </Modal>
+));
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Error in WasteWise component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-center">
+          <h2 className="text-xl font-bold text-red-600">Something went wrong</h2>
+          <p className="text-gray-600">Please try refreshing the page</p>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export function WasteWise() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { address, connector: activeConnector, isConnected } = useAccount();
-  //   const { data: ensAvatar } = useEnsAvatar({ address });
+  const { address, isConnected } = useAccount();
   const { isRegistered, currentUser } = useWasteWiseContext();
-  //   const { data: ensName } = useEnsName({ address });
-  const { connect, connectors, error, isPending } = useConnect({
-    mutation: {
-      onSuccess() {
-        setTimeout(() => {
-          // sdgModal.current?.showModal();
-          onOpen();
-        }, 800);
-      },
-    },
-  });
   const { isOpen, onOpen, onClose } = useDisclosure();
-
   const { disconnect } = useDisconnect();
   const [showConnectError, setShowConnectError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const sdgModal = useRef<HTMLDialogElement>(null);
+
+  const { connect, connectors, error, isPending } = useConnect({
+    mutation: {
+      onSuccess: () => {
+        setIsLoading(true);
+        setTimeout(() => {
+          onOpen();
+          setIsLoading(false);
+        }, 800);
+      },
+      onError(error) {
+        console.error("Connection error:", error);
+        toast.error("Failed to connect wallet. Please make sure MetaMask is installed and unlocked.");
+      }
+    },
+  });
 
   useEffect(() => {
     if (error) {
       setShowConnectError(true);
+      console.error("Connection error:", error);
     }
-    console.log(error);
-    return () => setShowConnectError(false);
   }, [error]);
 
-  // useEffect(() => {
-  //   if (isConnected) {
-  //     sdgModal.current?.showModal();
-  //   }
-  //   console.log(isConnected);
-  //   // console.log(isSuccess);
-  // }, [isConnected]);
-
-  const handleDisconnect = () => {
+  const handleDisconnect = useCallback(() => {
+    setIsLoading(true);
     disconnect();
     if (location.pathname !== "/") {
       setTimeout(() => {
         navigate("/");
+        setIsLoading(false);
       }, 400);
     }
-  };
+  }, [disconnect, location.pathname, navigate]);
 
-  const handleConnect = (connector: any) => {
-    connect({ connector });
-    // Show the modal
+  const handleConnect = useCallback(async () => {
+    try {
+      if (!window.ethereum) {
+        toast.error("Please install MetaMask to connect your wallet");
+        return;
+      }
 
-    // sdgModal.current?.showModal();
-  };
+      const connector = connectors[0];
+      if (!connector) {
+        toast.error("No wallet connector available");
+        return;
+      }
+
+      setIsLoading(true);
+      await connect({ connector });
+    } catch (error: any) {
+      console.error("Connection error:", error);
+      toast.error("Failed to connect wallet. Please try again.");
+      setIsLoading(false);
+    }
+  }, [connect, connectors]);
 
   if (isConnected) {
     return (
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingSkeleton />}>
       <>
         <div className="hidden dropdown dropdown-end">
           <label
@@ -103,10 +197,6 @@ export function WasteWise() {
             className="btn btn-ghost btn-circle avatar bg-green-200 hover:bg-green-100"
           >
             <div className="w-12 rounded-full">
-              {/* <img
-                  src="https://api.dicebear.com/7.x/adventurer/svg?seed=Coco"
-                  alt="avatar"
-                /> */}
               <img
                 src="https://api.dicebear.com/7.x/adventurer/svg?seed=Daisy"
                 alt="avatar"
@@ -150,51 +240,47 @@ export function WasteWise() {
           </ul>
         </div>
 
-        {!isPending ? (
-          <ProfileDropdown
+            {!isPending && !isLoading ? (
+              <MemoizedProfileDropdown
             isRegistered={isRegistered}
             currentUser={currentUser}
           />
         ) : (
-          <div className="max-w-40 w-full flex items-center gap-3">
-            <div>
-              <Skeleton className="flex rounded-full w-12 h-12" />
-            </div>
-            <div className="w-full flex flex-col gap-2">
-              <Skeleton className="h-3 w-3/5 rounded-lg" />
-              <Skeleton className="h-3 w-4/5 rounded-lg" />
-            </div>
-          </div>
+              <LoadingSkeleton />
         )}
 
         {!isRegistered && (
           <Modal
             isDismissable={false}
-            size={"2xl"}
+                size="2xl"
             isOpen={isOpen}
             onClose={onClose}
             classNames={{
-              backdrop:
-                "bg-gradient-to-t from-default-900 to-default-900/10 backdrop-opacity-40",
+                  backdrop: "bg-black/50 dark:bg-white/50 backdrop-opacity-40",
+                  base: "bg-white dark:bg-black text-black dark:text-white",
+                  header: "text-black dark:text-white",
+                  body: "text-black dark:text-white",
+                  footer: "text-black dark:text-white"
             }}
           >
             <ModalContent className="px-4 py-8">
               {(onClose) => (
                 <>
-                  <ModalHeader className="font-firaSans font-bold text-2xl flex flex-col gap-1">
+                      <ModalHeader className="font-firaSans font-bold text-2xl flex flex-col gap-1 text-black dark:text-white">
                     Welcome to RecycLink
                   </ModalHeader>
                   <ModalBody>
-                    <div className="text-pretty">
+                        <div className="text-pretty text-black dark:text-white">
                       We would like you to set a name so that we
                       can personalize your EIA card.
                     </div>
-                    {/* <div>
-                      Kindly click the signup button to fill in those details.
-                    </div> */}
                   </ModalBody>
                   <ModalFooter className="self-start mt-2">
-                    <Button as={Link} to="/register" color="default">
+                        <Button
+                          as={Link}
+                          to="/register"
+                          className="bg-[#983279] hover:bg-[#983279]/90 text-white"
+                        >
                       Set your name
                     </Button>
                   </ModalFooter>
@@ -206,19 +292,18 @@ export function WasteWise() {
 
         {!isRegistered && (
           <dialog id="my_modal_4" className="modal" ref={sdgModal}>
-            <div className="modal-box w-11/12 max-w-2xl">
+                <div className="modal-box w-11/12 max-w-2xl bg-white dark:bg-black text-black dark:text-white">
               <form method="dialog" className="modal-backdrop">
                 <div className="modal-action">
-                  {/* if there is a button, it will close the modal */}
-                  <button className="btn btn-md btn-rounded btn-ghost absolute right-8 top-8 text-base-content font-black">
+                      <button className="btn btn-md btn-rounded btn-ghost absolute right-8 top-8 text-black dark:text-white font-black">
                     ✕
                   </button>
                 </div>
               </form>
-              <h3 className="font-firaSans font-bold text-2xl px-1 pb-2 lg:px-4">
+                  <h3 className="font-firaSans font-bold text-2xl px-1 pb-2 lg:px-4 text-black dark:text-white">
                 Welcome to RecycLink
               </h3>
-              <div className="px-1 py-1 lg:px-4 lg:py-4 leading-8 text-balance">
+                  <div className="px-1 py-1 lg:px-4 lg:py-4 leading-8 text-balance text-black dark:text-white">
                 Thank you for connecting to RecycLink. We would like you to
                 set a name so that we can personalize your EIA
                 card.
@@ -226,101 +311,31 @@ export function WasteWise() {
                   Kindly click the signup button to fill in those details.
                 </div>
                 <Link to="/register" className="block mt-4">
-                  <Button>Signup</Button>
+                      <Button className="bg-[#983279] hover:bg-[#983279]/90 text-white">Signup</Button>
                 </Link>
               </div>
             </div>
-            {/* <form method="dialog" className="modal-backdrop">
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">
-                ✕
-              </button>
-            </form> */}
           </dialog>
         )}
       </>
-      // <div className="dropdown flex justify-between lg:w-1/3">
-      //   <div className="my-auto text-[#026937] lg:block hidden">
-      //     {shortenAddress(address as string)}
-      //   </div>
-
-      //   <button className="btn m-1 text-[#026937]" onClick={disconnect as any}>
-      //     Disconnect {connector?.name}
-      //   </button>
-      // </div>
+        </Suspense>
+      </ErrorBoundary>
     );
   }
 
   return (
+    <ErrorBoundary>
     <div>
       <div className="dropdown rounded-2xl w-full">
-        {/* <label
-          tabIndex={0}
-          className="btn m-1  border-[#026937] text-[#026937] bg-white hover:bg-[#026937] hover:text-white"
-        >
-          Connect Wallet
-        </label> */}
-        {/* <Button
-          // name="Connect Wallet"
-          size="md"
-          customStyle="text-xs lg:text-base"
-          type={"button"}
-          disabled={!connectors[0].id}
-          key={connectors[0].id}
-          onClick={() => handleConnect(connectors[0])}
-        >
-          {isPending ? <span className="loading"></span> : "Connect Wallet"}
-        </Button> */}
-        <Button
-          color="success"
-          variant="shadow"
-          size="lg"
-          onClick={() => handleConnect(connectors[0])}
-          type={"button"}
-          disabled={!connectors[0].id}
-          isLoading={isPending}
-          className="text-White"
-        >
-          {isPending ? (
-            <span className="">Connecting...</span>
-          ) : (
-            "Connect Wallet"
-          )}
-        </Button>
-        {/* <ul
-          tabIndex={0}
-          className="dropdown-content z-[1] menu flex flex-col mt-3"
-        >
-          {connectors.map((connector) => (
-            <li key={connector.id}>
-              {console.log(connector)}
-              <button
-                type={"button"}
-                disabled={!connector.ready}
-                key={connector.id}
-                onClick={() => connect({ connector })}
-                className="text-xs font-bold tracking-wide text-white hover:text-white bg-blue-800 hover:bg-blue-600 rounded-lg lg:py-3.5"
-              >
-                {connector.name}
-
-                {!connector.ready && " (unsupported)"}
-                {isLoading &&
-                  connector.id === pendingConnector?.id &&
-                  " (connecting)"}
-              </button>
-            </li>
-          ))}
-        </ul> */}
-      </div>
-
-      {!isPending && showConnectError && (
-        <div className="hidden">
-          {toast.error((error as BaseError).message)}
+          <ConnectButton onClick={handleConnect} isPending={isPending || isLoading} />
         </div>
-      )}
-      {/* {!isLoading && showConnectError && (
-        <ToastElem message={(error as BaseError)?.message} toastType="error" />
-      )} */}
-      {/* {error && <div>{(error as BaseError).shortMessage}</div>} */}
+
+        <ErrorModal 
+          isOpen={showConnectError} 
+          onClose={() => setShowConnectError(false)} 
+          error={error} 
+        />
     </div>
+    </ErrorBoundary>
   );
 }

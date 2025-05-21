@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-// import logo from "../assets/images/logo/transparent/RecycLink icon.png";
+import logo from "../assets/images/logo/transparent/RecycLink icon.png";
 
 type Props = {
   hideText?: boolean;
@@ -7,15 +7,18 @@ type Props = {
 
 const Logo = (props: Props) => {
   return (
-    <Link
-      to="/"
-      className="btn btn-ghost btn-neutral normal-case text-sm lg:text-xl font-bold lg:px-4 hover:bg-transparent"
-    >
-      <img src="https://res.cloudinary.com/detc4yjdi/image/upload/v1743686566/RecycLink_icon_o6blil.png" alt="" className="h-6 lg:h-7" />
+    <div className="flex items-center">
+      <Link to="/" className="flex items-center">
+        <img 
+          src={logo} 
+          alt="RecycLink Logo" 
+          className="h-8 w-8"
+        />
       {!props.hideText && (
-        <span className="font-extrabold pl-1">RecycLink</span>
+          <span className="ml-2 text-xl font-bold">RecycLink</span>
       )}
     </Link>
+    </div>
   );
 };
 

@@ -154,7 +154,8 @@ export const WastewiseProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Rest of your existing code...
+  // Initialize notification count
+  useEffect(() => {
   wastewiseStore
     .length()
     .then(function (nKeys) {
@@ -163,6 +164,7 @@ export const WastewiseProvider = ({ children }: { children: ReactNode }) => {
     .catch(function (err) {
       console.log("Error fetching store length: ", err);
     });
+  }, []);
 
   const fetchNotifications = useCallback(() => {
     wastewiseStore
@@ -179,11 +181,11 @@ export const WastewiseProvider = ({ children }: { children: ReactNode }) => {
       .catch(function (err) {
         console.log(err);
       });
-  }, [notifCount]);
+  }, [notifCount, notifications]);
 
   useEffect(() => {
     fetchNotifications();
-  }, [notifCount]);
+  }, [notifCount, fetchNotifications]);
 
   const { data } = useReadContract({
     address: RECYCLINK_ADDRESS,
@@ -250,19 +252,36 @@ export const WastewiseProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const initProvider = async () => {
       if (window.ethereum) {
+        try {
+          // Request account access first
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          
         const provider = new ethers.BrowserProvider(window.ethereum);
         setProvider(provider);
-        try {
+          
+          // Only try to get signer if we have an address
+          if (address) {
           const signer = await provider.getSigner();
           setSigner(signer);
+          }
         } catch (error) {
-          console.error("Failed to get signer:", error);
+          console.error("Failed to initialize provider:", error);
+          // Reset provider and signer on error
+          setProvider(null);
+          setSigner(null);
         }
       }
     };
 
+    // Only initialize if we have an address
+    if (address) {
     initProvider();
-  }, []);
+    } else {
+      // Reset provider and signer when no address
+      setProvider(null);
+      setSigner(null);
+    }
+  }, [address]); // Add address as dependency
 
   return (
     <WastewiseContext.Provider
@@ -301,3 +320,9 @@ export const WastewiseProvider = ({ children }: { children: ReactNode }) => {
 
 export const useWasteWiseContext = () => useContext(WastewiseContext);
 export default WastewiseProvider;
+
+export const useTheme = () => {
+  const ctx = useContext(WastewiseContext);
+  if (!ctx) throw new Error("useTheme must be used within WastewiseProvider");
+  return { darkMode: ctx.darkMode };
+};
