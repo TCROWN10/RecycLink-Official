@@ -1,6 +1,6 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 const { nextui } = require("@nextui-org/react");
-import daisyui from "daisyui";
+const daisyui = require("daisyui");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -295,81 +295,17 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    nextui(),
+    daisyui
+  ],
   daisyui: {
     themes: ["light", "dark"],
-    darkTheme: "dark",
     base: true,
     styled: true,
     utils: true,
     prefix: "",
-    logs: true,
-    themeRoot: ":root",
-  },
-  plugins: [
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            background: "#FFFFFF",
-            foreground: "#11181C",
-            primary: {
-              DEFAULT: "#3C50E0",
-              foreground: "#FFFFFF",
-            },
-            secondary: {
-              DEFAULT: "#80CAEE",
-              foreground: "#FFFFFF",
-            },
-            success: {
-              DEFAULT: "#10B981",
-              foreground: "#FFFFFF",
-            },
-            warning: {
-              DEFAULT: "#FFA70B",
-              foreground: "#FFFFFF",
-            },
-            danger: {
-              DEFAULT: "#DC3545",
-              foreground: "#FFFFFF",
-            },
-            content1: "#FFFFFF",
-            content2: "#F4F4F5",
-            content3: "#E2E8F0",
-            content4: "#CBD5E1",
-          },
-        },
-        dark: {
-          colors: {
-            background: "#1A1B1E",
-            foreground: "#ECEDEE",
-            primary: {
-              DEFAULT: "#3C50E0",
-              foreground: "#FFFFFF",
-            },
-            secondary: {
-              DEFAULT: "#80CAEE",
-              foreground: "#FFFFFF",
-            },
-            success: {
-              DEFAULT: "#10B981",
-              foreground: "#FFFFFF",
-            },
-            warning: {
-              DEFAULT: "#FFA70B",
-              foreground: "#FFFFFF",
-            },
-            danger: {
-              DEFAULT: "#DC3545",
-              foreground: "#FFFFFF",
-            },
-            content1: "#24303F",
-            content2: "#1A222C",
-            content3: "#2E3A47",
-            content4: "#374151",
-          },
-        },
-      },
-    }),
-    require("daisyui"),
-  ],
+    logs: false,
+    themeRoot: ":root"
+  }
 };

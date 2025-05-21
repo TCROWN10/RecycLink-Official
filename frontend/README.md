@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # RecycLink - Blockchain-Powered Recycling Platform
 
 ## Overview
@@ -88,46 +87,11 @@ Let's turn waste into wealth—and carbon reductions. Let's build a sustainable 
 - Tailwind CSS for styling
 - NextUI (with planned migration to HeroUI)
 - Wagmi for Ethereum interaction
-=======
-# RecycLink Smart Contract Documentation
-
-
-## Overview
-
-**RecycLink** is a cutting-edge blockchain-powered platform designed to address two major global challenges: plastic waste and climate change. By transforming plastic waste recycling into tradeable carbon credits, RecycLink offers a unique solution that incentivizes responsible waste disposal while contributing to global climate action. With a transparent and secure platform powered by blockchain, we’re helping users make a measurable difference in the fight against climate change, while also benefiting from the growing RecycLink market. Every recycled bottle not only reduces plastic waste but also contributes to significant CO₂ savings.
-
-Let’s turn waste into wealth—and carbon reductions. Let’s build a sustainable future with **RecycLink**.
-
-## The Platform: RecycLink
-
-**RecycLinke** tokenizes real-world assets (recycled plastic) to create a transparent and verifiable market for carbon credits. Our platform enables users to deposit plastic waste at designated collection points in exchange for Deposit Tokens, which can be spent in the marketplace. The collected plastics are then sent to recycling facilities where they are processed and converted into verifiable carbon credits.
-
-![Image](../Roadmap.svg)
-
-## Contracts
-
-The RecycLink is a comprehensive blockchain-based solution comprising three core contracts: `RecycLink` and `MarketPlace`. This integrated system is designed to promote environmental sustainability by rewarding users for recycling efforts through the issuance of receipt tokens ($EDU) and enabling the trade of items in a marketplace.
-
-### RecycLink
-
-- **Name**: RecycLink
-- **License**: UNLICENSED
-- **Solidity Version**: ^0.8.13
-
-**RecycLink** is a smart contract that manages user recycling information and rewards users for their recycling activities. Users can create accounts, record recycling transactions, and earn tokens for their efforts.
-
-### MarketPlace
-
-- **Name**: MarketPlace
-- **License**: MIT
-- **Solidity Version**: >=0.7.0 <0.9.0
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
 
 **MarketPlace** is a smart contract for managing item listings in a marketplace. Users can create listings, update item information, perform transactions, and redeem receipt tokens.
 
 ## Core Functionality
 
-<<<<<<< HEAD
 ### User Account Management
 - Users can create accounts with personal information
 - Recycling transactions are recorded, and users earn tokens
@@ -158,23 +122,17 @@ The RecycLink is a comprehensive blockchain-based solution comprising three core
 - Node.js (v18 or later)
 - npm or yarn
 - MetaMask or compatible Web3 wallet
-=======
-### User Account Management (RecycLink)
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
 
 - Users can create accounts with personal information.
 - Recycling transactions are recorded, and users earn tokens.
 - Users can edit their information.
 - User data is stored in a structured format.
 
-<<<<<<< HEAD
 1. Clone the repository:
 ```bash
 git clone https://github.com/your-username/recyclink.git
 cd recyclink
 ```
-=======
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
 
 ### Item Listing Management (MarketPlace)
 
@@ -190,31 +148,66 @@ cd recyclink
 - **Recycled Structure (RecycLink)**: Represents recycling transactions.
 - **ItemInfo Structure (MarketPlace)**: Stores item listing information.
 
-<<<<<<< HEAD
 4. Start the development servers:
 ```bash
 # Frontend
 cd frontend
 npm run dev
-=======
-## State Variables
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
 
 - **RecycLink**: Stores user data and recycling transactions.
 - **MarketPlace**: Manages item listings and transactions.
 
-<<<<<<< HEAD
 ## Deployed Contract Addresses
+- Deploying contracts with this account :`0xA1eE1Abf8B538711c7Aa6E2B37eEf1A48021F2bB`
+- USDT Token: `0x82838906eAD0cc4F9868864a86fA9dE6ceCca127`
+- Credit Token: `0x4cab13221b932BF7041aC863cE2165B56578F262`
+- RecycLink: ` 0x65eD271339261E2955d697b12e9500f90d348F8A`
+- Event MarketPlace: `0xDCC3466E28Fbd51959D4ffD2b7373e8306677D05`
+- RcMarketPlace: `0x3a17f587AA88D0349e7e5f93Fd263cD7DAe81867`
+- ProfileManager: `0xbe91571345578306822d89D33eB35d7AEa8A0ef5`
 
-- USDT Token: `0x412b74A7d8C333B1EBDF31768f776BB8C0C41169`
-- RecycLink: `0xAC7D133Fa5A84b26701B95c083695fBFD92ebE5b`
-- Event MarketPlace: `0x01dA771AD0fC40a97F65Bebbf9AD23d218463723`
-- RcMarketPlace: `0xDC5ee8E70a1F883f971261c9952650271381BEA7`
-=======
-## Custom Errors
 
-- Custom errors are defined to handle specific situations, such as account creation, token minting, and transaction issues.
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
+## Verified contract
+
+- Starting contract verification...
+
+Verifying USDToken...
+The contract 0x01b4992196cc7fbaE72464f23207969098C8180E has already been verified on the block explorer. If you're trying to verify a partially verified contract, please use the --force flag.
+https://sepolia.etherscan.io/address/0x82838906eAD0cc4F9868864a86fA9dE6ceCca127#code
+
+USDToken verified successfully!
+
+Verifying CreditToken...
+Successfully submitted source code for contract
+contracts/Credit.sol:USDToken at 0xb956c36662A5832A5CB77238ff2d15420dE2E50D
+for verification on the block explorer. Waiting for verification result...
+
+Successfully verified contract USDToken on the block explorer.
+https://sepolia.etherscan.io/address/0x4cab13221b932BF7041aC863cE2165B56578F262#code
+
+CreditToken verified successfully!
+
+Verifying CarbonWise...
+The contract 0x67521aE24d53586fd8EeC2ee41405393922965E2 has already been verified on the block explorer. If you're trying to verify a partially verified contract, please use the --force flag.
+https://sepolia.etherscan.io/address/0x65eD271339261E2955d697b12e9500f90d348F8A#code
+
+CarbonWise verified successfully!
+
+Verifying EventMarketPlace...
+The contract 0xB1ec853169C435fDb6204F8f2A279DcD790feBad has already been verified on the block explorer. If you're trying to verify a partially verified contract, please use the --force flag.
+https://sepolia.etherscan.io/address/0xDCC3466E28Fbd51959D4ffD2b7373e8306677D05#code
+
+EventMarketPlace verified successfully!
+
+Verifying CcMarketPlace...
+The contract 0x1Ac63228160e8Ac6fcd974D158008D7b31C9fACC has already been verified on the block explorer. If you're trying to verify a partially verified contract, please use the --force flag.
+https://sepolia.etherscan.io/address/0x3a17f587AA88D0349e7e5f93Fd263cD7DAe81867#code
+
+CcMarketPlace verified successfully!
+
+ProfileManager -0xbe91571345578306822d89D33eB35d7AEa8A0ef5
+https://sepolia.etherscan.io/address/0xbe91571345578306822d89D33eB35d7AEa8A0ef5#code
+TCROWN-MACBOOK:Backend tcrown10$ 
 
 ## Usage
 
@@ -224,7 +217,6 @@ The RecycLink smart contract system is designed to create a sustainable ecosyste
 
 The smart contracts are released under the UNLICENSED and MIT licenses, allowing for open use, modification, and distribution. However, ensure a clear understanding of the code and its functionality before deploying it in a production environment.
 
-<<<<<<< HEAD
 ## Contact
 
 For any questions or concerns, please reach out to the development team.
@@ -233,14 +225,3 @@ For any questions or concerns, please reach out to the development team.
 
 - Thanks to all contributors who have helped shape this project
 - Special thanks to the open-source community for their invaluable tools and libraries
-=======
-## Deployed Contract Addresses on EDU - Chain
-
-USDT Token - 0x412b74A7d8C333B1EBDF31768f776BB8C0C41169
-
-Recyclink - 0xAC7D133Fa5A84b26701B95c083695fBFD92ebE5b
-
-Event MarketPlace - 0x01dA771AD0fC40a97F65Bebbf9AD23d218463723
-
-RcMarketPlace - 0xDC5ee8E70a1F883f971261c9952650271381BEA7
->>>>>>> 4642c7a7a6ca799e7a7400e95378e763ab55fd96
