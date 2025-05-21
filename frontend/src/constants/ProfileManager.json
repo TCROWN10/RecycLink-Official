@@ -1,0 +1,89 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_email",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_phoneNo",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_country",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_gender",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_profileImage",
+        "type": "string"
+      }
+    ],
+    "name": "updateProfile",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "profiles",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "email",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "phoneNo",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "country",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gender",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "profileImage",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "userAddr",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] 
