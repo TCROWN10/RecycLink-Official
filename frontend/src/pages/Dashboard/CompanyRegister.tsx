@@ -28,6 +28,7 @@ import {
 } from "@nextui-org/react";
 import { ChevronDownIcon } from "../../assets/icons";
 import { ChevronLeftIcon } from "lucide-react";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const CompanyRegister = () => {
   const navigate = useNavigate();
@@ -146,7 +147,6 @@ const CompanyRegister = () => {
                 isClearable
                 isRequired
                 size="lg"
-                // label="Company Name"
                 labelPlacement="outside"
                 placeholder="Your company name"
                 value={name}
@@ -164,6 +164,7 @@ const CompanyRegister = () => {
                 isLoading={isLoading || settling}
                 isDisabled={!name}
                 className="w-6/12 text-white"
+                startContent={isLoading || settling ? <LoadingSpinner size="sm" /> : null}
               >
                 Register
               </Button>

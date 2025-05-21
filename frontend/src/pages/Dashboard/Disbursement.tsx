@@ -19,6 +19,7 @@ import {
   LucideCoins,
   LucideCurrency,
 } from "lucide-react";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Disbursement = () => {
   const { address } = useAccount();
@@ -104,7 +105,7 @@ const Disbursement = () => {
             size="lg"
             variant="shadow"
             isLoading={isPending || isLoading}
-            startContent={<LucideCoins />}
+            startContent={isPending || isLoading ? <LoadingSpinner size="sm" /> : <LucideCoins />}
             className="bg-[#983279] hover:bg-[#983279]/90 text-white"
           >
             Disburse to Recyclers

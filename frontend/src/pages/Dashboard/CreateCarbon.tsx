@@ -19,6 +19,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { LucideArrowRight } from "lucide-react";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 type Props = {};
 
@@ -196,7 +197,7 @@ const CreateCarbon = (props: Props) => {
             <div className="card-actions">
               <button className="btn w-full max-w-xs sm:max-w-md mx-auto md:max-w-2xl text-white bg-[#026937] hover:bg-[#026937]">
                 {isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
+                  <LoadingSpinner size="sm" />
                 ) : (
                   "submit"
                 )}

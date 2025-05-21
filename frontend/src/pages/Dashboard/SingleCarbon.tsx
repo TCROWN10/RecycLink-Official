@@ -26,6 +26,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@nextui-org/react";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface datap {
   price: number;
@@ -263,7 +264,7 @@ const SingleCarbon = () => {
               disabled={handleDisable()}
             >
               {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
+                <LoadingSpinner size="sm" />
               ) : handleDisable() ? (
                 "Sold"
               ) : (
@@ -303,7 +304,7 @@ const SingleCarbon = () => {
               disabled={handleDisable()}
             >
               {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
+                <LoadingSpinner size="sm" />
               ) : handleDisable() ? (
                 "Expired"
               ) : (
@@ -339,7 +340,7 @@ const SingleCarbon = () => {
               type="submit"
             >
               {loadingA ? (
-                <span className="loading loading-spinner loading-sm"></span>
+                <LoadingSpinner size="sm" />
               ) : (
                 "Approve"
               )}

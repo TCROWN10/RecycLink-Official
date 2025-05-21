@@ -13,6 +13,7 @@ import {
 } from "../../constants";
 import { formatEther } from "viem";
 import { toast } from "sonner";
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 type Props = {};
 
@@ -75,7 +76,7 @@ const MyCarbonEvents = (props: Props) => {
             <div className="overflow-x-auto">
                 {loading ? (
                     <div className="w-20 mx-auto">
-                        <span className="loading loading-spinner w-full bg-[#026937]"></span>
+                        <LoadingSpinner size="md" />
                     </div>
                 ) : (
                     <table className="table table-xs lg:table-md">
